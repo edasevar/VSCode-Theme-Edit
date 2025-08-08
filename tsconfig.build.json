@@ -15,7 +15,8 @@
 		"sourceMap": true,
 		"types": [
 			"node",
-			"vscode"		],
+			"vscode"
+		],
 		"typeRoots": [
 			"./node_modules/@types"
 		]

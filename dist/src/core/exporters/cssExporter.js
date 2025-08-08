@@ -14,7 +14,6 @@ function exportAsCss(theme) {
         lines.push(`  ${toVar(k)}: ${value};`);
     }
     lines.push("}");
-    // Optional: minimal token preview classes
     lines.push("", "/* Token examples */");
     lines.push(".tm-comment { color: var(--vscode-editorCodeLens-foreground, #888); }");
     return lines.join("\n");

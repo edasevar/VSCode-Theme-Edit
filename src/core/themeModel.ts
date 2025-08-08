@@ -10,7 +10,7 @@ export const blankTheme = (): ThemeSpec => ({
 	semanticTokenColors: {}
 });
 
-/** Shallow merge utility (not used directly yet, but handy for future) */
+/** Shallow merge utility (handy later) */
 export function mergeTheme (base: ThemeSpec, incoming: ThemeSpec): ThemeSpec {
 	return {
 		$schema: incoming.$schema || base.$schema,

@@ -12,7 +12,7 @@ const blankTheme = () => ({
     semanticTokenColors: {}
 });
 exports.blankTheme = blankTheme;
-/** Shallow merge utility (not used directly yet, but handy for future) */
+/** Shallow merge utility (handy later) */
 function mergeTheme(base, incoming) {
     return {
         $schema: incoming.$schema || base.$schema,

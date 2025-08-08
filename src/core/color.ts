@@ -7,8 +7,6 @@ export function normalizeColor (input: string | undefined): string | undefined {
 	if (!input || typeof input !== "string") return input;
 
 	const trimmed = input.trim();
-
-	// Match #RRGGBBAA
 	const m = /^#([0-9a-fA-F]{8})$/.exec(trimmed);
 	if (!m) return trimmed;
 
@@ -22,7 +20,7 @@ export function normalizeColor (input: string | undefined): string | undefined {
 	return `rgba(${r}, ${g}, ${b}, ${aStr})`;
 }
 
-/** Apply normalizeColor to an object of key->color (non-destructive copy) */
+/** Apply normalizeColor to an object of key->color (copy) */
 export function normalizeColorMap<T extends Record<string, any>> (map: T): T {
 	const out: any = Array.isArray(map) ? [] : {};
 	for (const [k, v] of Object.entries(map)) {

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { parse } from "jsonc-parser";
-import { ThemeSpec } from "../types";
+import { ThemeSpec } from "../../core/types";
 
 /**
  * Find the active theme's JSON by label in installed extensions.

@@ -8,7 +8,6 @@ suite("color normalization", () => {
 
 	test("#RRGGBBAA converts to rgba()", () => {
 		const out = normalizeColor("#11223344");
-		// 0x44 = 68 / 255 ≈ 0.2667 -> rounded to 0.267
 		assert.strictEqual(out, "rgba(17, 34, 51, 0.267)");
 	});
 

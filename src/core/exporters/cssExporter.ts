@@ -15,7 +15,6 @@ export function exportAsCss (theme: ThemeSpec): string {
 	}
 	lines.push("}");
 
-	// Optional: minimal token preview classes
 	lines.push("", "/* Token examples */");
 	lines.push(".tm-comment { color: var(--vscode-editorCodeLens-foreground, #888); }");
 

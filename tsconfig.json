@@ -22,7 +22,6 @@
 		]
 	},
 	"include": [
-		"src/core/importers/currentThemeImporter.ts",
 		"src/**/*.ts"
 	],
 	"exclude": [

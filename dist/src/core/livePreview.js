@@ -55,9 +55,7 @@ async function applyLivePreview(theme) {
         previousTextmate = cfg.get("editor.tokenColorCustomizations");
         previousSemantic = cfg.get("editor.semanticTokenColorCustomizations");
     }
-    // Normalize workbench colors
     const workbench = (0, color_1.normalizeColorMap)(theme.colors);
-    // Normalize TextMate rules’ colors
     const textMateRules = theme.tokenColors.map(tmRule => {
         const r = JSON.parse(JSON.stringify(tmRule));
         if (r.settings) {
@@ -70,17 +68,13 @@ async function applyLivePreview(theme) {
         }
         return r;
     });
-    // Normalize semantic token rules
     const semanticRules = {};
     for (const [k, v] of Object.entries(theme.semanticTokenColors)) {
         if (typeof v === "string") {
             semanticRules[k] = { foreground: (0, color_1.normalizeColor)(v) };
         }
         else {
-            semanticRules[k] = {
-                ...v,
-                foreground: (0, color_1.normalizeColor)(v.foreground)
-            };
+            semanticRules[k] = { ...v, foreground: (0, color_1.normalizeColor)(v.foreground) };
         }
     }
     await cfg.update("workbench.colorCustomizations", workbench, vscode.ConfigurationTarget.Global);

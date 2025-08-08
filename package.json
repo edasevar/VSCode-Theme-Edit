@@ -1,9 +1,9 @@
 {
 	"name": "theme-lab",
 	"displayName": "Theme Lab",
-	"description": "Design, preview, import/export VS Code themes with live preview, element navigation, and #RRGGBBAA alpha support.",
+	"description": "Design, preview, import/export VS Code themes with live preview, element navigation, validation, and #RRGGBBAA alpha support.",
 	"publisher": "edasevar",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"engines": {
 		"vscode": "^1.102.0"
 	},

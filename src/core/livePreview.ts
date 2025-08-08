@@ -23,10 +23,8 @@ export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 		previousSemantic = cfg.get("editor.semanticTokenColorCustomizations");
 	}
 
-	// Normalize workbench colors
 	const workbench = normalizeColorMap(theme.colors);
 
-	// Normalize TextMate rules’ colors
 	const textMateRules = theme.tokenColors.map(tmRule => {
 		const r: TextMateRule = JSON.parse(JSON.stringify(tmRule));
 		if (r.settings) {
@@ -40,16 +38,12 @@ export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 		return r;
 	});
 
-	// Normalize semantic token rules
 	const semanticRules: Record<string, any> = {};
 	for (const [k, v] of Object.entries(theme.semanticTokenColors)) {
 		if (typeof v === "string") {
 			semanticRules[k] = { foreground: normalizeColor(v) };
 		} else {
-			semanticRules[k] = {
-				...v,
-				foreground: normalizeColor(v.foreground)
-			};
+			semanticRules[k] = { ...v, foreground: normalizeColor(v.foreground) };
 		}
 	}
 

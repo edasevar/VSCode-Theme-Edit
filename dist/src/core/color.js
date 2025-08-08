@@ -11,7 +11,6 @@ function normalizeColor(input) {
     if (!input || typeof input !== "string")
         return input;
     const trimmed = input.trim();
-    // Match #RRGGBBAA
     const m = /^#([0-9a-fA-F]{8})$/.exec(trimmed);
     if (!m)
         return trimmed;
@@ -23,7 +22,7 @@ function normalizeColor(input) {
     const aStr = (Math.round(a * 1000) / 1000).toString();
     return `rgba(${r}, ${g}, ${b}, ${aStr})`;
 }
-/** Apply normalizeColor to an object of key->color (non-destructive copy) */
+/** Apply normalizeColor to an object of key->color (copy) */
 function normalizeColorMap(map) {
     const out = Array.isArray(map) ? [] : {};
     for (const [k, v] of Object.entries(map)) {
