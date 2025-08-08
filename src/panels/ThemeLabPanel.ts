@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 import { loadTemplateJsonc } from "../core/templateParser";
 import { ThemeSpec } from "../core/types";
 import { blankTheme } from "../core/themeModel";
@@ -41,21 +42,28 @@ export class ThemeLabPanel implements vscode.Disposable {
 			{
 				enableScripts: true,
 				retainContextWhenHidden: true,
-				localResourceRoots: [this.ctx.extensionUri]
+				localResourceRoots: [vscode.Uri.file(this.ctx.extensionPath)]
 			}
 		);
 
 		this.panel.webview.html = this.getHtml(this.panel.webview);
 
-		// Load template -> descriptions/categories
-		const tplPath = path.join(ctx.extensionPath, "assets", "template.jsonc");
-		const { theme, descriptions, categories } = loadTemplateJsonc(tplPath);
+		// Load template from assets (fallback to bundled default if the main one is missing)
+		const tplPrimary = vscode.Uri.file(path.join(this.ctx.extensionPath, "assets", "template.jsonc"));
+		const tplFallback = vscode.Uri.file(path.join(this.ctx.extensionPath, "assets", "template.default.jsonc"));
+		const tplPath = this.uriExistsSync(tplPrimary) ? tplPrimary.fsPath : tplFallback.fsPath;
+
+		const { theme, descriptions, categories, tree } = loadTemplateJsonc(tplPath);
+
+		// record known keys for validation
 		Object.values(categories).forEach(list => list.forEach(k => this.knownKeys.add(k)));
 
+		// boot payload => webview
 		this.panel.webview.postMessage({
 			type: "templateLoaded",
 			descriptions,
 			categories,
+			tree,
 			templateName: theme.name,
 			persisted: {
 				theme: this.theme,
@@ -74,6 +82,14 @@ export class ThemeLabPanel implements vscode.Disposable {
 		if (persisted.ui?.liveEnabled) {
 			this.liveEnabled = true;
 			void applyLivePreview(this.theme);
+		}
+	}
+
+	private uriExistsSync (uri: vscode.Uri): boolean {
+		try {
+			return fs.existsSync(uri.fsPath);
+		} catch {
+			return false;
 		}
 	}
 
@@ -139,6 +155,35 @@ export class ThemeLabPanel implements vscode.Disposable {
 					if (file?.[0]) {
 						this.theme = await importVsixTheme(file[0].fsPath);
 						await this.onThemeUpdated();
+					}
+					break;
+				}
+
+				case "loadTemplate": {
+					const file = await vscode.window.showOpenDialog({
+						canSelectFiles: true,
+						filters: { Template: ["jsonc", "json"] },
+						canSelectMany: false
+					});
+					if (file?.[0]) {
+						const { descriptions, categories, tree } = loadTemplateJsonc(file[0].fsPath);
+						// refresh known keys
+						this.knownKeys.clear();
+						Object.values(categories).forEach(list => list.forEach(k => this.knownKeys.add(k)));
+						// send new template data
+						this.panel.webview.postMessage({
+							type: "templateLoaded",
+							descriptions,
+							categories,
+							tree,
+							templateName: path.basename(file[0].fsPath),
+							persisted: {
+								theme: this.theme,
+								ui: this.storage.load().ui,
+								bundleCount: this.bundle.list().length
+							}
+						});
+						await this.runValidation();
 					}
 					break;
 				}
@@ -234,14 +279,14 @@ export class ThemeLabPanel implements vscode.Disposable {
 			defaultUri: vscode.Uri.file(`${defaultName}.${ext}`)
 		});
 		if (!dest) return;
-		await vscode.workspace.fs.writeFile(dest, Buffer.from(contents, "utf8"));
+		await fs.promises.writeFile(dest.fsPath, contents, "utf8");
 		vscode.window.showInformationMessage(`Saved ${ext.toUpperCase()} to ${dest.fsPath}`);
 	}
 
 	private getHtml (webview: vscode.Webview): string {
-		const mediaRoot = vscode.Uri.joinPath(this.ctx.extensionUri, "media");
-		const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, "app.css"));
-		const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaRoot, "app.js"));
+		const mediaRoot = vscode.Uri.file(path.join(this.ctx.extensionPath, "media"));
+		const cssUri = webview.asWebviewUri(vscode.Uri.file(path.join(mediaRoot.fsPath, "app.css")));
+		const jsUri = webview.asWebviewUri(vscode.Uri.file(path.join(mediaRoot.fsPath, "app.js")));
 		const nonce = String(Math.random()).slice(2);
 
 		return /* html */ `
@@ -265,30 +310,33 @@ export class ThemeLabPanel implements vscode.Disposable {
   <header>
     <h1>Theme Lab</h1>
     <div class="row">
-      <input id="themeName" placeholder="Theme name" />
-      <select id="themeType">
-        <option value="dark">dark</option>
-        <option value="light">light</option>
-        <option value="hc">hc</option>
+      <input id="themeName" placeholder="Theme name" class="tooltip" data-tooltip="Enter a name for your custom theme" />
+      <select id="themeType" class="tooltip" data-tooltip="Choose theme appearance type: dark, light, or high contrast">
+        <option value="dark">Dark Theme</option>
+        <option value="light">Light Theme</option>
+        <option value="hc">High Contrast</option>
       </select>
-      <label><input type="checkbox" id="liveToggle" checked /> Live preview</label>
-      <button id="undoBtn" title="Undo (Ctrl/Cmd+Z)">Undo</button>
-      <button id="redoBtn" title="Redo (Ctrl/Cmd+Y)">Redo</button>
+      <label class="tooltip" data-tooltip="Enable real-time preview of changes in VS Code interface">
+        <input type="checkbox" id="liveToggle" checked /> Live preview
+      </label>
+      <button id="undoBtn" title="Undo recent changes (Ctrl/Cmd+Z)" class="secondary tooltip" data-tooltip="Undo the last change">↶ Undo</button>
+      <button id="redoBtn" title="Redo recent changes (Ctrl/Cmd+Y)" class="secondary tooltip" data-tooltip="Redo the last undone change">↷ Redo</button>
     </div>
     <div class="row">
-      <button id="startBlank">Start blank</button>
-      <button id="useCurrent">Use current theme</button>
-      <button id="importJSON">Import JSON</button>
-      <button id="importVSIX">Import VSIX</button>
+      <button id="startBlank" class="secondary tooltip" data-tooltip="Start with a completely blank theme template">🆕 Start Blank</button>
+      <button id="useCurrent" class="secondary tooltip" data-tooltip="Import the currently active VS Code theme">📥 Import Current</button>
+      <button id="importJSON" class="secondary tooltip" data-tooltip="Import theme from a JSON/JSONC file">📄 Import JSON</button>
+      <button id="importVSIX" class="secondary tooltip" data-tooltip="Import theme from a VS Code extension package">📦 Import VSIX</button>
+      <button id="loadTemplateBtn" class="secondary tooltip" data-tooltip="Load a different template structure">🔧 Load Template</button>
       <span class="spacer"></span>
-      <button id="bundleAdd">Add to Bundle</button>
-      <button id="bundleClear">Clear Bundle</button>
-      <button id="exportBundleVSIX">Export Bundle VSIX</button>
-      <span id="bundleCount" class="pill">0</span>
+      <button id="bundleAdd" class="tooltip" data-tooltip="Add current theme to the bundle for multi-theme export">➕ Add to Bundle</button>
+      <button id="bundleClear" class="secondary tooltip" data-tooltip="Clear all themes from the current bundle">🗑️ Clear Bundle</button>
+      <button id="exportBundleVSIX" class="tooltip" data-tooltip="Export all bundled themes as a single VS Code extension">📦 Export Bundle</button>
+      <span id="bundleCount" class="pill tooltip" data-tooltip="Number of themes in current bundle">0</span>
       <span class="spacer"></span>
-      <button id="exportJSON">Export JSON</button>
-      <button id="exportCSS">Export CSS</button>
-      <button id="exportVSIX">Export VSIX</button>
+      <button id="exportJSON" class="tooltip" data-tooltip="Export current theme as JSON file">💾 Export JSON</button>
+      <button id="exportCSS" class="tooltip" data-tooltip="Export current theme as CSS variables">🎨 Export CSS</button>
+      <button id="exportVSIX" class="tooltip" data-tooltip="Export current theme as VS Code extension package">📦 Export VSIX</button>
     </div>
   </header>
 
@@ -297,73 +345,105 @@ export class ThemeLabPanel implements vscode.Disposable {
 
     <section id="editor">
       <div id="searchBar">
-        <input id="filter" placeholder="Find color key…" />
+        <input id="filter" placeholder="Search color keys..." class="tooltip" data-tooltip="Filter color keys by name (e.g., 'editor', 'button', 'sidebar')" />
+        <span class="help-icon tooltip" data-tooltip="Use specific keywords to find related colors quickly. Try 'editor' for editor colors, 'ui' for interface colors.">?</span>
       </div>
       <div id="colorsList"></div>
 
-      <h2>Tokens</h2>
+      <h2>Token Colors <span class="help-icon tooltip" data-tooltip="Token colors control syntax highlighting for code elements like keywords, strings, comments, etc.">?</span></h2>
       <div id="tokensEditor"></div>
 
-      <h2>Semantic Tokens</h2>
+      <h2>Semantic Tokens <span class="help-icon tooltip" data-tooltip="Semantic tokens provide advanced syntax highlighting based on code meaning, not just syntax patterns.">?</span></h2>
       <div id="semanticEditor"></div>
     </section>
 
     <section id="sidebar">
       <div class="tabs">
-        <button data-tab="preview" class="tab active">Preview</button>
-        <button data-tab="problems" class="tab">Problems</button>
-        <button data-tab="diff" class="tab">Diff</button>
+        <button data-tab="preview" class="tab active tooltip" data-tooltip="Live preview of your theme with sample VS Code interface elements">🔍 Preview</button>
+        <button data-tab="problems" class="tab tooltip" data-tooltip="View validation issues like invalid colors or unknown color keys">⚠️ Issues</button>
+        <button data-tab="diff" class="tab tooltip" data-tooltip="See changes made to the selected color">📋 Changes</button>
       </div>
 
       <div id="tab-preview" class="tabpage active">
         <h2>Live Preview</h2>
+
         <div class="preview-grid">
+          <!-- Title bar -->
+          <div class="prev-card" data-element="titleBar.activeBackground">
+            <h3>Title Bar</h3>
+            <div class="vstitle"><span>index.ts — Theme Lab</span><span>🗕 🗖 ✖</span></div>
+          </div>
+
+          <!-- Buttons & input -->
           <div class="prev-card" data-element="button.background">
-            <h3>Button</h3>
-            <button class="demo-btn">Primary</button>
-          </div>
-          <div class="prev-card" data-element="input.background">
-            <h3>Input</h3>
-            <input class="demo-input" placeholder="Type here…" />
-          </div>
-          <div class="prev-card" data-element="tab.activeBackground">
-            <h3>Tabs</h3>
-            <div class="demo-tabs">
-              <div class="tabi active">Active</div>
-              <div class="tabi">Idle</div>
+            <h3>Button & Input</h3>
+            <div class="row">
+              <button class="demo-btn">Primary</button>
+              <input class="demo-input" placeholder="Type here…" />
             </div>
           </div>
-          <div class="prev-card" data-element="editor.background">
-            <h3>Code</h3>
-            <pre class="code"><code>// Quick sample
-function hello(name) {
-  const msg = \`Hello, \${name}\`;
-  return msg;
-}</code></pre>
+
+          <!-- Activity bar -->
+          <div class="prev-card" data-element="activityBar.background">
+            <h3>Activity Bar</h3>
+            <div class="activity">
+              <div class="activity-item active" title="Explorer">🧭</div>
+              <div class="activity-item" title="Search">🔎</div>
+              <div class="activity-item" title="Source Control">🔀</div>
+              <div class="activity-item" title="Run">▶</div>
+            </div>
           </div>
 
-          <div class="prev-card" data-element="list.activeSelectionBackground">
-            <h3>Explorer (mock)</h3>
-            <ul class="explorer">
-              <li class="folder open">src
-                <ul>
-                  <li>extension.ts</li>
-                  <li>theme.json</li>
+          <!-- Editor shell -->
+          <div class="prev-card" data-element="tab.activeBackground">
+            <h3>Editor Shell</h3>
+            <div class="vscontainer">
+              <div class="vssidebar">
+                <b>EXPLORER</b>
+                <ul class="explorer">
+                  <li class="active">src</li>
+                  <li>media</li>
                 </ul>
-              </li>
-              <li class="folder">media</li>
-            </ul>
+              </div>
+              <div class="vseditor">
+                <div class="vstabs">
+                  <div class="vstab active">index.ts</div>
+                  <div class="vstab">README.md</div>
+                </div>
+                <pre class="ed"><code>
+<span class="line"><span class="tok-comment">// Quick sample</span></span>
+<span class="line hl"><span class="tok-keyword">function</span> <span class="tok-func">hello</span>(<span class="tok-var">name</span>: <span class="tok-keyword">string</span>) {</span>
+<span class="line">  <span class="tok-keyword">const</span> <span class="tok-var">msg</span> = <span class="tok-string">\`Hello, \${name}\`</span>;</span>
+<span class="line">  <span class="tok-keyword">return</span> <span class="tok-var">msg</span>;</span>
+<span class="line">}</span>
+<span class="line"><span class="tok-var">hello</span>(<span class="tok-string">"World"</span>);<span class="cursor"></span></span>
+                </code></pre>
+              </div>
+            </div>
           </div>
 
+          <!-- Panel -->
           <div class="prev-card" data-element="panel.background">
-            <h3>Problems (mock)</h3>
-            <ul class="problems">
-              <li>sample.ts:1:1  Unused var</li>
-              <li>main.ts:10:5  Missing semicolon</li>
-            </ul>
+            <h3>Panel</h3>
+            <div class="panel">
+              <div class="panel-header">Problems</div>
+              <div class="panel-body">
+                <div class="panel-row warn">src/index.ts:42 Unused variable</div>
+                <div class="panel-row bad">src/app.ts:5  Cannot read property 'x'</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status bar -->
+          <div class="prev-card" data-element="statusBar.background">
+            <h3>Status Bar</h3>
+            <div class="vstitle" style="background: var(--pv-statusbar-bg); color: var(--pv-statusbar-fg);">
+              <span>$(branch) main</span><span>UTF-8  LF  TypeScript</span>
+            </div>
           </div>
         </div>
-        <p class="hint">Selecting a key highlights the matching card so you *see* what you’re changing.</p>
+
+        <p class="hint">Selecting a key highlights the matching card and updates the preview using your colors.</p>
       </div>
 
       <div id="tab-problems" class="tabpage">

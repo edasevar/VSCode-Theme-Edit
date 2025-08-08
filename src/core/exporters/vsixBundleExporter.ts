@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
 import AdmZip from "adm-zip";
 import { ThemeSpec } from "../types";
 
@@ -61,7 +62,7 @@ export async function exportAsVsixBundle (themes: ThemeSpec[]): Promise<void> {
 		zip.addFile(p, Buffer.from(JSON.stringify(t, null, 2), "utf8"));
 	}
 
-	await vscode.workspace.fs.writeFile(saveUri, zip.toBuffer());
+	await fs.promises.writeFile(saveUri.fsPath, zip.toBuffer());
 	vscode.window.showInformationMessage(`Saved bundle VSIX to ${saveUri.fsPath}`);
 }
 

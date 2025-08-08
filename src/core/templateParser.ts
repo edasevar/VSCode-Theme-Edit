@@ -1,17 +1,19 @@
 import * as fs from "fs";
 import { parse } from "jsonc-parser";
-import { CategorizedKeys, DescriptionsIndex, ThemeSpec } from "./types";
+import { CategorizedKeys, CategoryNode, DescriptionsIndex, ThemeSpec } from "./types";
 
 /**
  * Parse the JSONC template:
  *  1) JSONC -> ThemeSpec
  *  2) trailing comments -> descriptions
- *  3) CAPITALIZED section headers -> categories
+ *  3) CAPITALIZED section headers -> flat categories (legacy)
+ *  4) category tree -> Section → prefix groups (editor., statusBar., etc.)
  */
 export function loadTemplateJsonc (templatePath: string): {
 	theme: ThemeSpec;
 	descriptions: DescriptionsIndex;
 	categories: CategorizedKeys;
+	tree: CategoryNode[];
 } {
 	const raw = fs.readFileSync(templatePath, "utf8");
 
@@ -26,8 +28,9 @@ export function loadTemplateJsonc (templatePath: string): {
 	};
 
 	const categories = categorizeKeys(colorBlock);
+	const tree = buildTree(categories);
 
-	return { theme, descriptions, categories };
+	return { theme, descriptions, categories, tree };
 }
 
 function extractBlock (source: string, startRegex: RegExp, _label: string): string {
@@ -66,14 +69,11 @@ function extractTrailingComments (block: string): DescriptionsIndex {
 	return map;
 }
 
-/** Map color keys to nearest CAPITALIZED section heading like:
- *  // ======
- *  // EDITOR & MINIMAP
- */
+/** Legacy (flat) sections from comment banners. */
 function categorizeKeys (colorBlock: string): CategorizedKeys {
 	const lines = colorBlock.split(/\r?\n/);
 	const result: CategorizedKeys = {};
-	let current = "Misc";
+	let current = "General";
 
 	const section = /^\s*\/\/\s*={5,}\s*$/;
 	const sectionTitle = /^\s*\/\/\s*(.+?)\s*$/;
@@ -89,7 +89,7 @@ function categorizeKeys (colorBlock: string): CategorizedKeys {
 		}
 		if (waitingForTitle) {
 			const m = line.match(sectionTitle);
-			if (m) current = m[1].trim();
+			if (m) current = m[1].trim() || "General";
 			waitingForTitle = false;
 			continue;
 		}
@@ -101,5 +101,36 @@ function categorizeKeys (colorBlock: string): CategorizedKeys {
 		}
 	}
 
+	if (!Object.keys(result).length) result["General"] = [];
 	return result;
+}
+
+/** Build a nicer tree: Section -> prefix groups (e.g. "editor.", "statusBar.") -> keys */
+function buildTree (sections: CategorizedKeys): CategoryNode[] {
+	const nodes: CategoryNode[] = [];
+	for (const [section, keys] of Object.entries(sections)) {
+		const groups = new Map<string, string[]>();
+		for (const k of keys) {
+			const prefix = (k.split(".")[0] || "misc").trim();
+			const label = title(prefix);
+			if (!groups.has(label)) groups.set(label, []);
+			groups.get(label)!.push(k);
+		}
+		const children: CategoryNode[] = [];
+		for (const [label, groupKeys] of Array.from(groups.entries()).sort()) {
+			children.push({ id: `${section}/${label}`, label, keys: groupKeys.sort() });
+		}
+		nodes.push({ id: section, label: section, children: children.sort((a, b) => a.label.localeCompare(b.label)) });
+	}
+	nodes.sort((a, b) => a.label.localeCompare(b.label));
+	return nodes;
+}
+
+function title (s: string): string {
+	return s
+		.replace(/([A-Z])/g, " $1")
+		.replace(/[-_.]/g, " ")
+		.replace(/\s+/g, " ")
+		.replace(/^\s|\s$/g, "")
+		.replace(/(^|\s)\S/g, c => c.toUpperCase());
 }

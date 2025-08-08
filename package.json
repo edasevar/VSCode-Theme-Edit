@@ -3,7 +3,7 @@
 	"displayName": "Theme Lab",
 	"description": "Design, preview, import/export VS Code themes with live preview, element navigation, validation, and #RRGGBBAA alpha support.",
 	"publisher": "edasevar",
-	"version": "1.2.0",
+	"version": "1.5.0",
 	"engines": {
 		"vscode": "^1.102.0"
 	},
@@ -32,10 +32,13 @@
 		"clean": "rimraf dist dist-tests"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.0.0",
 		"@types/adm-zip": "0.5.7",
 		"@types/mocha": "10.0.10",
 		"@types/node": "24.2.0",
 		"@types/vscode": "^1.102.0",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
 		"eslint": "9.32.0",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-plugin-import": "2.32.0",
@@ -47,7 +50,6 @@
 		"vscode-test": "1.6.1"
 	},
 	"dependencies": {
-		"adm-zip": "0.5.16",
-		"vscode": "^1.1.37"
+		"adm-zip": "0.5.16"
 	}
 }

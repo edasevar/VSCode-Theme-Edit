@@ -5,7 +5,7 @@ import { loadTemplateJsonc } from "../../src/core/templateParser";
 suite("templateParser", () => {
 	test("extracts descriptions and categories", () => {
 		const { descriptions, categories, theme } = loadTemplateJsonc(
-			path.join(__dirname, "../../assets/template.jsonc")
+			path.join(__dirname, "../../../assets/template.jsonc")
 		);
 
 		assert.ok(theme);

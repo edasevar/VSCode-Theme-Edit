@@ -28,3 +28,11 @@ export interface DescriptionsIndex {
 export interface CategorizedKeys {
 	[category: string]: string[];
 }
+
+/** Rich category tree for the sidebar (Section → Prefix group → Keys). */
+export interface CategoryNode {
+	id: string;                 // e.g., "Editor"
+	label: string;              // display label
+	keys?: string[];            // direct keys under this node
+	children?: CategoryNode[];  // sub-groups
+}
