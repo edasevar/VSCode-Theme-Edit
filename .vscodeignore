@@ -1,0 +1,5 @@
+node_modules/**/*.map
+node_modules/**/test/**
+**/*.ts
+src/**
+scripts/**

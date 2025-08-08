@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link href="editor.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="workbench">
+    <div class="activity-bar">activityBar</div>
+    <div class="side-bar">sideBar</div>
+    <div class="editor">
+      <div class="tabs">tab.active / tab.inactive</div>
+      <pre class="code" contenteditable="true">
+// This is a preview of editor colors
+function greet(name) {
+  const msg = `Hello, ${name}!`;
+  console.log(msg);
+}
+      </pre>
+    </div>
+    <div class="status-bar">statusBar</div>
+  </div>
+  <script>
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'highlight') {
+      const key = e.data.key;
+      const hot = document.querySelector('[data-token="'+key+'"]');
+      if (hot) {
+        hot.classList.add('pulse');
+        setTimeout(() => hot.classList.remove('pulse'), 800);
+      }
+    }
+  });
+  </script>
+</body>
+</html>

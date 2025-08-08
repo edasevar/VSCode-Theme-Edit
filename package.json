@@ -1,0 +1,72 @@
+{
+	"name": "vscode-theme-designer",
+	"displayName": "VS Code Theme Designer",
+	"description": "Design, preview, and export VS Code color themes (VSIX/JSON/CSS) with live preview and guided navigation.",
+	"version": "1.0.0",
+	"publisher": "edasevar",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/edasevar/vscode-theme-designer.git"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:themeDesigner.open",
+		"onView:themeDesigner"
+	],
+	"main": "./out/src/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "themeDesigner.open",
+				"title": "Theme Designer: Open"
+			},
+			{
+				"command": "themeDesigner.import.json",
+				"title": "Theme Designer: Import JSON"
+			},
+			{
+				"command": "themeDesigner.import.vsix",
+				"title": "Theme Designer: Import VSIX"
+			},
+			{
+				"command": "themeDesigner.import.current",
+				"title": "Theme Designer: Import Current Theme"
+			},
+			{
+				"command": "themeDesigner.export.vsix",
+				"title": "Theme Designer: Export as VSIX"
+			},
+			{
+				"command": "themeDesigner.export.json",
+				"title": "Theme Designer: Export as JSON"
+			},
+			{
+				"command": "themeDesigner.export.css",
+				"title": "Theme Designer: Export as CSS"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run build",
+		"build": "tsc -p .",
+		"watch": "tsc -w -p .",
+		"lint": "echo \"add eslint if you want\"",
+		"package": "vsce package",
+		"test": "echo \"add tests later\""
+	},
+	"devDependencies": {
+		"@types/node": "24.2.0",
+		"@types/vscode": "^1.102.0",
+		"jsonc-parser": "3.3.1",
+		"typescript": "5.9.2",
+		"vsce": "2.15.0"
+	},
+	"dependencies": {
+		"adm-zip": "0.5.16",
+		"jszip": "3.10.1",
+		"vscode": "^1.1.37"
+	}
+}
