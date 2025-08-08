@@ -15,14 +15,12 @@
 		"sourceMap": true,
 		"types": [
 			"node",
-			"vscode"
-		],
+			"vscode"		],
 		"typeRoots": [
 			"./node_modules/@types"
 		]
 	},
 	"include": [
-		"src/core/importers/currentThemeImporter.ts",
 		"src/**/*.ts"
 	],
 	"exclude": [

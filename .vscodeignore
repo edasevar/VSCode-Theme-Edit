@@ -1,5 +1,6 @@
-node_modules/**/*.map
-node_modules/**/test/**
+**/.git**
+**/.vscode/**
+**/tests/**
+**/*.map
 **/*.ts
-src/**
-scripts/**
+node_modules/**/test/**

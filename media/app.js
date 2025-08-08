@@ -1,147 +1,236 @@
+// Plain JS webview controller. No bundler/framework.
 const vscode = acquireVsCodeApi();
 
-const els = {
-	groups: document.getElementById('groups'),
-	fields: document.getElementById('fields'),
-	themeName: document.getElementById('themeName'),
-	filter: document.getElementById('filter'),
-	preview: document.getElementById('previewFrame'),
+const el = sel => document.querySelector(sel);
+const els = sel => Array.from(document.querySelectorAll(sel));
+const esc = s => (window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/"/g, '\\"'));
 
-	btnImportJson: document.getElementById('btnImportJson'),
-	btnImportVsix: document.getElementById('btnImportVsix'),
-	btnImportCurrent: document.getElementById('btnImportCurrent'),
-	btnExportJson: document.getElementById('btnExportJson'),
-	btnExportCss: document.getElementById('btnExportCss'),
-	btnExportVsix: document.getElementById('btnExportVsix'),
+let theme = {
+	$schema: "vscode://schemas/color-theme",
+	name: "My Theme",
+	type: "dark",
+	colors: {},
+	tokenColors: [],
+	semanticTokenColors: {}
 };
 
-let MODEL = {
-	name: '',
-	groups: [], // [{ id, title, items: [{ key, value, description }]}]
-	map: new Map() // key -> {groupId, idx}
-};
+let descriptions = {};
+let categories = {};
+let filteredKeys = [];
 
-function post(type, payload) { vscode.postMessage({ type, ...payload }); }
+const categoriesRoot = el("#categories");
+const colorsList = el("#colorsList");
+const tokensEditor = el("#tokensEditor");
+const semanticEditor = el("#semanticEditor");
 
-// init
-window.addEventListener('message', (e) => {
-	const msg = e.data;
-	if (msg.type === 'init') {
-		const { themeName, groups } = msg.payload;
-		MODEL.name = themeName;
-		MODEL.groups = groups;
-		MODEL.map = new Map();
-		groups.forEach(g => g.items.forEach((it, idx) => MODEL.map.set(it.key, { groupId: g.id, idx })));
-		renderSidebar(groups);
-		renderFields(groups);
-		els.themeName.textContent = themeName || 'Untitled Theme';
-	}
-	if (msg.type === 'highlight') {
-		highlightKey(msg.key);
-		els.preview.contentWindow.postMessage({ type: 'highlight', key: msg.key }, '*');
-	}
-});
+function post(type, payload = {}) { vscode.postMessage({ type, ...payload }); }
 
-function renderSidebar(groups) {
-	els.groups.innerHTML = '';
-	for (const g of groups) {
-		const div = document.createElement('div');
-		div.className = 'group';
-		const h = document.createElement('h3');
-		h.textContent = g.title;
+function renderCategories() {
+	categoriesRoot.innerHTML = "";
+	Object.entries(categories).forEach(([cat, keys]) => {
+		const div = document.createElement("div");
+		div.className = "cat";
+		const h = document.createElement("h3");
+		h.textContent = cat;
 		div.appendChild(h);
-		const frag = document.createDocumentFragment();
-		for (const it of g.items) {
-			const a = document.createElement('div');
-			a.className = 'key';
-			a.dataset.key = it.key;
-			a.textContent = it.key;
-			a.title = it.description ?? '';
-			a.onclick = () => scrollToField(it.key, true);
-			frag.appendChild(a);
-		}
-		div.appendChild(frag);
-		els.groups.appendChild(div);
-	}
-}
 
-function renderFields(groups) {
-	els.fields.innerHTML = '';
-	for (const g of groups) {
-		const h = document.createElement('h2');
-		h.textContent = g.title;
-		els.fields.appendChild(h);
-		for (const it of g.items) {
-			const row = document.createElement('div');
-			row.className = 'field';
-			row.id = 'field__' + cssId(it.key);
+		keys.forEach(k => {
+			const a = document.createElement("div");
+			a.textContent = k;
+			a.className = "key";
+			a.addEventListener("click", () => {
+				const field = el(`[data-key="${esc(k)}"]`);
+				if (field) field.scrollIntoView({ behavior: "smooth", block: "center" });
+				highlightPreview(k);
+			});
+			div.appendChild(a);
+		});
 
-			const label = document.createElement('div');
-			label.textContent = it.key;
-
-			const input = document.createElement('input');
-			input.className = 'color-input';
-			input.type = 'text';
-			input.value = it.value || '#000000';
-			input.onchange = () => updateColor(it, input.value);
-
-			const picker = document.createElement('input');
-			picker.type = 'color';
-			picker.value = maybeHex(input.value);
-			picker.oninput = () => { input.value = picker.value; updateColor(it, picker.value); };
-
-			const desc = document.createElement('div');
-			desc.className = 'desc';
-			desc.textContent = it.description || '';
-
-			row.append(label, input, picker, desc);
-			els.fields.appendChild(row);
-		}
-	}
-}
-
-function cssId(key) { return key.replace(/[^\w-]+/g, '_'); }
-
-function maybeHex(v) {
-	const m = (v || '').match(/^#([0-9a-f]{6}|[0-9a-f]{3})$/i);
-	return m ? v : '#000000';
-}
-
-function updateColor(item, value) {
-	post('update:color', { groupId: item.groupId, key: item.key, value });
-}
-
-function scrollToField(key, fromSidebar) {
-	const el = document.getElementById('field__' + cssId(key));
-	if (!el) return;
-	el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-	highlightKey(key);
-	if (!fromSidebar) {
-		const sidebarKey = document.querySelector(`.group .key[data-key="${key}"]`);
-		sidebarKey?.classList.add('active');
-	}
-}
-
-function highlightKey(key) {
-	document.querySelectorAll('.group .key.active').forEach(n => n.classList.remove('active'));
-	const node = document.querySelector(`.group .key[data-key="${key}"]`);
-	node?.classList.add('active');
-}
-
-els.filter.addEventListener('input', () => {
-	const q = els.filter.value.trim().toLowerCase();
-	document.querySelectorAll('.group .key').forEach(n => {
-		const show = !q || n.dataset.key.toLowerCase().includes(q);
-		n.style.display = show ? '' : 'none';
+		categoriesRoot.appendChild(div);
 	});
+}
+
+function renderColors() {
+	const keys = Object.keys(theme.colors).length ? Object.keys(theme.colors) : inferKeysFromTemplate();
+	const f = el("#filter").value.trim().toLowerCase();
+	filteredKeys = keys.filter(k => !f || k.toLowerCase().includes(f));
+
+	colorsList.innerHTML = "";
+	filteredKeys.forEach(k => {
+		const rowKey = document.createElement("div");
+		rowKey.textContent = k;
+		rowKey.className = "key";
+
+		const rowVal = document.createElement("input");
+		rowVal.type = "text";
+		rowVal.className = "color-input";
+		rowVal.placeholder = "#rrggbb or #rrggbbaa";
+		rowVal.value = theme.colors[k] || "";
+		rowVal.setAttribute("data-key", k);
+		rowVal.addEventListener("change", () => {
+			theme.colors[k] = rowVal.value.trim();
+			post("updateColor", { key: k, value: theme.colors[k] });
+			highlightPreview(k);
+		});
+
+		colorsList.appendChild(rowKey);
+		colorsList.appendChild(rowVal);
+
+		if (descriptions[k]) {
+			const desc = document.createElement("div");
+			desc.className = "key-desc";
+			desc.textContent = descriptions[k];
+			colorsList.appendChild(desc);
+		}
+	});
+}
+
+function renderTokens() {
+	tokensEditor.innerHTML = "";
+	theme.tokenColors.forEach((rule, i) => {
+		const row = document.createElement("div");
+		row.className = "token-row";
+
+		const name = document.createElement("input");
+		name.type = "text";
+		name.placeholder = "Name";
+		name.value = rule.name || "";
+		name.addEventListener("change", () => {
+			rule.name = name.value;
+			post("updateToken", { index: i, rule });
+		});
+
+		const scope = document.createElement("input");
+		scope.type = "text";
+		scope.placeholder = "Scope (comma-separated)";
+		scope.value = Array.isArray(rule.scope) ? rule.scope.join(", ") : (rule.scope || "");
+		scope.addEventListener("change", () => {
+			rule.scope = scope.value.split(",").map(s => s.trim()).filter(Boolean);
+			post("updateToken", { index: i, rule });
+		});
+
+		const color = document.createElement("input");
+		color.type = "text";
+		color.className = "color-input";
+		color.placeholder = "#rrggbb or #rrggbbaa";
+		color.value = (rule.settings && rule.settings.foreground) || "";
+		color.addEventListener("change", () => {
+			rule.settings = rule.settings || {};
+			rule.settings.foreground = color.value.trim();
+			post("updateToken", { index: i, rule });
+		});
+
+		row.appendChild(name);
+		row.appendChild(scope);
+		row.appendChild(color);
+		tokensEditor.appendChild(row);
+	});
+
+	const add = document.createElement("button");
+	add.textContent = "Add token rule";
+	add.addEventListener("click", () => {
+		theme.tokenColors.push({ name: "Rule", scope: "", settings: { foreground: "#cccccc" } });
+		renderTokens();
+	});
+	tokensEditor.appendChild(add);
+}
+
+function renderSemantic() {
+	semanticEditor.innerHTML = "";
+	const keys = Object.keys(theme.semanticTokenColors);
+	keys.forEach(k => {
+		const row = document.createElement("div");
+		row.className = "token-row";
+
+		const name = document.createElement("input");
+		name.type = "text";
+		name.value = k;
+		name.disabled = true;
+
+		const color = document.createElement("input");
+		color.type = "text";
+		color.className = "color-input";
+		color.placeholder = "#rrggbb or #rrggbbaa";
+		const val = theme.semanticTokenColors[k];
+		color.value = typeof val === "string" ? val : (val.foreground || "");
+		color.addEventListener("change", () => {
+			const v = color.value.trim();
+			if (typeof val === "string") theme.semanticTokenColors[k] = v;
+			else theme.semanticTokenColors[k] = { ...(val || {}), foreground: v };
+			post("updateSemantic", { key: k, value: theme.semanticTokenColors[k] });
+		});
+
+		row.appendChild(name);
+		row.appendChild(color);
+		semanticEditor.appendChild(row);
+	});
+
+	const add = document.createElement("button");
+	add.textContent = "Add semantic rule";
+	add.addEventListener("click", () => {
+		const key = prompt("Semantic token selector (e.g. function, class, *.declaration)");
+		if (!key) return;
+		theme.semanticTokenColors[key] = "#cccccc";
+		renderSemantic();
+		post("updateSemantic", { key, value: theme.semanticTokenColors[key] });
+	});
+	semanticEditor.appendChild(add);
+}
+
+/** Highlight preview card matching a color key */
+function highlightPreview(key) {
+	els(".prev-card").forEach(c => c.classList.remove("highlight"));
+	const match = els(`.prev-card`).find(d => d.getAttribute("data-element") === key);
+	if (match) {
+		match.classList.add("highlight");
+		match.scrollIntoView({ behavior: "smooth", block: "nearest" });
+	}
+}
+
+function inferKeysFromTemplate() {
+	const all = new Set();
+	Object.values(categories).forEach(list => list.forEach(k => all.add(k)));
+	return Array.from(all);
+}
+
+// --- header controls
+el("#liveToggle").addEventListener("change", e => post("toggleLive", { value: e.target.checked }));
+el("#startBlank").addEventListener("click", () => post("startBlank"));
+el("#useCurrent").addEventListener("click", () => post("useCurrentTheme"));
+el("#importJSON").addEventListener("click", () => post("importJSON"));
+el("#importVSIX").addEventListener("click", () => post("importVSIX"));
+el("#exportJSON").addEventListener("click", () => post("exportJSON"));
+el("#exportCSS").addEventListener("click", () => post("exportCSS"));
+el("#exportVSIX").addEventListener("click", () => post("exportVSIX"));
+el("#themeName").addEventListener("change", e => post("rename", { name: e.target.value }));
+el("#themeType").addEventListener("change", e => post("setType", { value: e.target.value }));
+el("#filter").addEventListener("input", () => renderColors());
+
+// Messages from extension
+window.addEventListener("message", ev => {
+	const msg = ev.data;
+	if (msg.type === "templateLoaded") {
+		descriptions = msg.descriptions || {};
+		categories = msg.categories || {};
+		el("#themeName").value = "My Theme";
+		el("#themeType").value = "dark";
+		renderCategories();
+		renderColors();
+		renderTokens();
+		renderSemantic();
+	}
+	if (msg.type === "themeLoaded") {
+		theme = msg.theme;
+		el("#themeName").value = theme.name || "My Theme";
+		el("#themeType").value = theme.type || "dark";
+		renderColors();
+		renderTokens();
+		renderSemantic();
+	}
 });
 
-els.btnImportJson.onclick = () => post('request:init') || vscode.postMessage({ type: 'command', command: 'themeDesigner.import.json' });
-els.btnImportVsix.onclick = () => vscode.postMessage({ type: 'command', command: 'themeDesigner.import.vsix' });
-els.btnImportCurrent.onclick = () => vscode.postMessage({ type: 'command', command: 'themeDesigner.import.current' });
-els.btnExportJson.onclick = () => vscode.postMessage({ type: 'command', command: 'themeDesigner.export.json' });
-els.btnExportCss.onclick = () => vscode.postMessage({ type: 'command', command: 'themeDesigner.export.css' });
-els.btnExportVsix.onclick = () => vscode.postMessage({ type: 'command', command: 'themeDesigner.export.vsix' });
-
-// ask for initial payload
-vscode.postMessage({ type: 'request:init' });
+// initial render
+renderCategories();
+renderColors();
+renderTokens();
+renderSemantic();
