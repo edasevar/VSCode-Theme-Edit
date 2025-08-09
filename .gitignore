@@ -2,4 +2,9 @@ node_modules
 .vscode
 dist-tests
 .github
-dist/src
+*dist\src\core
+.eslintrc.json
+.prettierrc
+.vscodeignore
+.gitignore
+eslint.config.js

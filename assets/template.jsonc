@@ -2,6 +2,7 @@
 	"$schema": "vscode://schemas/color-theme",
 	"name": "Template",
 	"type": "dark",
+	// colors: { element: "#ffffffaa" } // Use #RRGGBBAA (alpha supported); will normalize to rgba() in live preview
 	"colors": {
 		// ========================================
 		// GLOBAL COLORS & BASIC UI ELEMENTS
@@ -1242,42 +1243,84 @@
 	// ========================================
 	// Language semantic highlighting for modern code analysis
 	// Provides type-aware syntax highlighting based on language server data
+	// semanticTokenColors: { token: { fontStyle?: "italic bold underline strikethrough" | "normal", foreground?: "#ffffffaa" } }
+	// fontStyle: choose any combination of italic/bold/underline/strikethrough; "normal" clears styles
 	"semanticTokenColors": {
 		// ========================================
 		// TYPE SYSTEM & STRUCTURES
 		// ========================================
-		"class": "#ffffff", // Color for class names
-		"enum": "#808080", // Color for enumeration types
-		"interface": "#ff4000", // Color for interface declarations
-		"struct": "#808080", // Color for struct types
-		"type": "#606060", // Color for type aliases and type names
-		"typeParameter": "#888888", // Color for generic type parameters
+		"class": {
+			"foreground": "#ffffff"
+		}, // Color for class names
+		"enum": {
+			"foreground": "#808080"
+		}, // Color for enumeration types
+		"interface": {
+			"foreground": "#ff4000"
+		}, // Color for interface declarations
+		"struct": {
+			"foreground": "#808080"
+		}, // Color for struct types
+		"type": {
+			"foreground": "#606060"
+		}, // Color for type aliases and type names
+		"typeParameter": {
+			"foreground": "#888888"
+		}, // Color for generic type parameters
 		// ========================================
 		// VARIABLES & IDENTIFIERS
 		// ========================================
-		"enumMember": "#808080", // Color for enumeration members
-		"parameter": "#ff8040", // Color for function/method parameters
-		"property": "#4080ff", // Color for object properties and class fields
-		"variable": "#cccccc", // Color for variables and identifiers
+		"enumMember": {
+			"foreground": "#808080"
+		}, // Color for enumeration members
+		"parameter": {
+			"foreground": "#ff8040"
+		}, // Color for function/method parameters
+		"property": {
+			"foreground": "#4080ff"
+		}, // Color for object properties and class fields
+		"variable": {
+			"foreground": "#cccccc"
+		}, // Color for variables and identifiers
 		// ========================================
 		// LITERALS & CONSTANTS
 		// ========================================
-		"boolean": "#ffffff", // Color for boolean literals (true/false)
-		"number": "#80ff00", // Color for numeric literals
-		"regexp": "#ff4080", // Color for regular expression literals
-		"string": "#ffffff", // Color for string literals
+		"boolean": {
+			"foreground": "#ffffff"
+		}, // Color for boolean literals (true/false)
+		"number": {
+			"foreground": "#80ff00"
+		}, // Color for numeric literals
+		"regexp": {
+			"foreground": "#ff4080"
+		}, // Color for regular expression literals
+		"string": {
+			"foreground": "#ffffff"
+		}, // Color for string literals
 		// ========================================
 		// FUNCTIONS & METHODS
 		// ========================================
-		"function": "#999999", // Color for function names
-		"method": "#808080", // Color for method names
+		"function": {
+			"foreground": "#999999"
+		}, // Color for function names
+		"method": {
+			"foreground": "#808080"
+		}, // Color for method names
 		// ========================================
 		// LANGUAGE CONSTRUCTS
 		// ========================================
-		"comment": "#777777", // Color for comments
-		"keyword": "#8040ff", // Color for language keywords
-		"modifier": "#999999", // Color for access modifiers (public, private, etc.)
-		"namespace": "#606060", // Color for namespace declarations
+		"comment": {
+			"foreground": "#777777"
+		}, // Color for comments
+		"keyword": {
+			"foreground": "#8040ff"
+		}, // Color for language keywords
+		"modifier": {
+			"foreground": "#999999"
+		}, // Color for access modifiers (public, private, etc.)
+		"namespace": {
+			"foreground": "#606060"
+		}, // Color for namespace declarations
 		// ========================================
 		// SEMANTIC MODIFIERS
 		// ========================================
@@ -1305,13 +1348,19 @@
 			"foreground": "#999999"
 		},
 		"*.static": {
-			"fontStyle": "italic"
+			"fontStyle": "italic",
+			"foreground": "#cccccc"
+
 		},
 		"*.readonly": {
-			"fontStyle": "bold"
+			"fontStyle": "bold",
+			"foreground": "#cccccc"
+
 		},
 		"*.abstract": {
-			"fontStyle": "italic"
+			"fontStyle": "italic",
+			"foreground": "#cccccc"
+
 		},
 		// Documentation & Library Elements
 		"*.documentation": {
@@ -1332,6 +1381,8 @@
 	// ========================================
 	// Traditional TextMate-style syntax highlighting rules
 	// Provides scope-based highlighting for all programming languages
+	// tokenColors: [ { name?: string, scope: string | string[], settings: { fontStyle?: "italic bold underline strikethrough" | "normal", foreground?: "#ffffffaa" } } ]
+	// scope: a TextMate scope or array; fontStyle rules follow same normalization
 	"tokenColors": [
 		// ========================================
 		// COMMENTS & DOCUMENTATION
@@ -2293,266 +2344,266 @@
 			}
 		},
 		{
-			"name": "Property Metadata", // Metadata information for object properties
+			"name": "Property Metadata", 
 			"scope": "meta.property",
 			"settings": {
 				"foreground": "#aaccff"
 			}
 		},
 		{
-			"name": "Constant Variables", // Variables declared as constants
+			"name": "Constant Variables", 
 			"scope": "variable.other.constant",
 			"settings": {
 				"foreground": "#88ff44"
 			}
 		},
 		{
-			"name": "Readonly Variables", // Variables marked as readonly
+			"name": "Readonly Variables", 
 			"scope": "variable.readonly",
 			"settings": {
 				"foreground": "#88ff44"
 			}
 		},
 		{
-			"name": "Object Literal Keys", // Keys in object literal expressions
+			"name": "Object Literal Keys", 
 			"scope": "meta.object-literal.key",
 			"settings": {
 				"foreground": "#f6fcfc"
 			}
 		},
 		{
-			"name": "Keywords", // General language keywords
+			"name": "Keywords", 
 			"scope": "keyword",
 			"settings": {
 				"foreground": "#6644ff"
 			}
 		},
 		{
-			"name": "Import/From Keywords", // Import statement keywords
+			"name": "Import/From Keywords", 
 			"scope": "keyword.control.import",
 			"settings": {
 				"foreground": "#ff4488"
 			}
 		},
 		{
-			"name": "From Keywords", // From clause in import statements
+			"name": "From Keywords", 
 			"scope": "keyword.control.from",
 			"settings": {
 				"foreground": "#ff4488"
 			}
 		},
 		{
-			"name": "Import Statements", // General import keywords
+			"name": "Import Statements", 
 			"scope": "keyword.import",
 			"settings": {
 				"foreground": "#ff4488"
 			}
 		},
 		{
-			"name": "Exception Keywords", // Exception handling keywords (throw, catch)
+			"name": "Exception Keywords", 
 			"scope": "keyword.control.exception",
 			"settings": {
 				"foreground": "#ff6622"
 			}
 		},
 		{
-			"name": "Try-Catch Keywords", // Try-catch block keywords
+			"name": "Try-Catch Keywords", 
 			"scope": "keyword.control.trycatch",
 			"settings": {
 				"foreground": "#ff6622"
 			}
 		},
 		{
-			"name": "Storage Modifiers", // Access modifiers (public, private, protected)
+			"name": "Storage Modifiers", 
 			"scope": "storage.modifier",
 			"settings": {
 				"foreground": "#999999"
 			}
 		},
 		{
-			"name": "Keyword Modifiers", // Modifier keywords (static, final, abstract)
+			"name": "Keyword Modifiers", 
 			"scope": "keyword.modifier",
 			"settings": {
 				"foreground": "#999999"
 			}
 		},
 		{
-			"name": "Storage Types", // Type declaration keywords (class, interface, enum)
+			"name": "Storage Types",
 			"scope": "storage.type",
 			"settings": {
 				"foreground": "#999999"
 			}
 		},
 		{
-			"name": "Operator Keywords", // Operator keywords (instanceof, typeof, new)
+			"name": "Operator Keywords",
 			"scope": "keyword.operator",
 			"settings": {
 				"foreground": "#cccccc"
 			}
 		},
 		{
-			"name": "String Literals", // String literal values
+			"name": "String Literals",
 			"scope": "string",
 			"settings": {
 				"foreground": "#ffffff"
 			}
 		},
 		{
-			"name": "Link Strings", // URL and link strings
+			"name": "Link Strings",
 			"scope": "string.other.link",
 			"settings": {
 				"foreground": "#ffffff"
 			}
 		},
 		{
-			"name": "Markdown Raw Strings", // Raw code blocks in markdown
+			"name": "Markdown Raw Strings", 
 			"scope": "markup.inline.raw.string.markdown",
 			"settings": {
-				"foreground": "#606060"
+				"foreground": "#606060" 
 			}
 		},
 		{
-			"name": "Escape Characters", // Escaped characters in strings (\n, \t, etc.)
+			"name": "Escape Characters", 
 			"scope": "constant.character.escape",
 			"settings": {
 				"foreground": "#00ffaa"
 			}
 		},
 		{
-			"name": "Placeholder Constants", // Template placeholder constants
+			"name": "Placeholder Constants", 
 			"scope": "constant.other.placeholder",
 			"settings": {
 				"foreground": "#00ffaa"
 			}
 		},
 		{
-			"name": "Numeric Constants", // Numeric literal values
+			"name": "Numeric Constants", 
 			"scope": "constant.numeric",
 			"settings": {
 				"foreground": "#80ff00"
 			}
 		},
 		{
-			"name": "Boolean Constants", // Boolean literal values (true, false)
+			"name": "Boolean Constants", 
 			"scope": "constant.language.boolean",
 			"settings": {
 				"foreground": "#ffffff"
 			}
 		},
 		{
-			"name": "JSON Language Constants", // JSON-specific constants (null, true, false)
+			"name": "JSON Language Constants", 
 			"scope": "constant.language.json",
 			"settings": {
 				"foreground": "#ffffff"
 			}
 		},
 		{
-			"name": "Label Names", // Named labels for goto statements
+			"name": "Label Names", 
 			"scope": "entity.name.label",
 			"settings": {
 				"foreground": "#929292"
 			}
 		},
 		{
-			"name": "Label Definition Punctuation", // Punctuation for label definitions (:)
+			"name": "Label Definition Punctuation", 
 			"scope": "punctuation.definition.label",
 			"settings": {
 				"foreground": "#929292"
 			}
 		},
 		{
-			"name": "Comments", // Code comments
+			"name": "Comments", 
 			"scope": "comment",
 			"settings": {
 				"foreground": "#6d6d6d"
 			}
 		},
 		{
-			"name": "Comment Definition Punctuation", // Comment start/end punctuation (// /* */)
+			"name": "Comment Definition Punctuation", 
 			"scope": "punctuation.definition.comment",
 			"settings": {
 				"foreground": "#6d6d6d"
 			}
 		},
 		{
-			"name": "Documentation Comments", // Documentation comments (JSDoc, etc.)
+			"name": "Documentation Comments", 
 			"scope": "comment.documentation",
 			"settings": {
 				"foreground": "#929292"
 			}
 		},
 		{
-			"name": "Documentation Line Comments", // Single-line documentation comments
+			"name": "Documentation Line Comments", 
 			"scope": "comment.line.documentation",
 			"settings": {
 				"foreground": "#929292"
 			}
 		},
 		{
-			"name": "Namespace Names", // Namespace identifiers
+			"name": "Namespace Names", 
 			"scope": "entity.name.namespace",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Namespace Modifiers", // Namespace declaration modifiers
+			"name": "Namespace Modifiers", 
 			"scope": "storage.modifier.namespace",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Markdown Bold", // Bold text in markdown
+			"name": "Markdown Bold", 
 			"scope": "markup.bold.markdown",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Module Names", // Module identifiers
+			"name": "Module Names", 
 			"scope": "entity.name.module",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Module Modifiers", // Module declaration modifiers
+			"name": "Module Modifiers", 
 			"scope": "storage.modifier.module",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Underlined Links", // Underlined link markup
+			"name": "Underlined Links", 
 			"scope": "markup.underline.link",
 			"settings": {
 				"foreground": "#808080"
 			}
 		},
 		{
-			"name": "Component Classes", // UI component class names
+			"name": "Component Classes", 
 			"scope": "support.class.component",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Attribute Metadata", // Metadata for attributes and annotations
+			"name": "Attribute Metadata", 
 			"scope": "meta.attribute",
 			"settings": {
 				"foreground": "#929292"
 			}
 		},
 		{
-			"name": "Info Tokens", // Information-level tokens
+			"name": "Info Tokens", 
 			"scope": "token.info-token",
 			"settings": {
 				"foreground": "#808080"
 			}
 		},
 		{
-			"name": "Warning Tokens", // Warning-level tokens
+			"name": "Warning Tokens", 
 			"scope": "token.warn-token",
 			"settings": {
 				"foreground": "#808080"
@@ -2562,14 +2613,14 @@
 		// SPECIAL TOKENS & DEBUGGING
 		// ========================================
 		{
-			"name": "Error Tokens", // Error-level tokens for syntax issues
+			"name": "Error Tokens", 
 			"scope": "token.error-token",
 			"settings": {
 				"foreground": "#404040"
 			}
 		},
 		{
-			"name": "Debug Tokens", // Debug-specific tokens and breakpoints
+			"name": "Debug Tokens", 
 			"scope": "token.debug-token",
 			"settings": {
 				"foreground": "#404040"
@@ -2579,7 +2630,7 @@
 		// CSS & STYLING
 		// ========================================
 		{
-			"name": "CSS Numeric Values", // Numeric values in CSS (pixels, percentages, etc.)
+			"name": "CSS Numeric Values", 
 			"scope": "constant.numeric.css",
 			"settings": {
 				"foreground": "#80ff00"

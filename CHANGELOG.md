@@ -4,6 +4,21 @@ All notable changes to the Theme Lab extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-08-09
+
+### 🔧 Color Rules & Live Preview
+- Normalize `#RRGGBBAA` to `rgba(r,g,b,a)` for workbench, TextMate, and semantic token colors during live preview.
+- TextMate `fontStyle` normalization: remove `normal`, map `underlined`→`underline`, dedupe unknowns, and enforce stable order `italic bold underline strikethrough`.
+- Semantic token `fontStyle` strings converted to boolean flags `{ italic?, bold?, underline?, strikethrough? }`; `normal` sets all flags to `false`.
+ - Live preview now sets `editor.semanticTokenColorCustomizations.enabled: true` when applying rules so semantic token colors take effect immediately.
+
+### 🛡️ Webview Robustness
+- Guarded `postMessage` calls in `media/app.js` to avoid runtime errors if VS Code API is unavailable.
+
+### 🧹 Maintenance
+- Cleaned `package.json` (removed invalid JSON comment). Reverted `type: module` to keep Mocha tests working under CommonJS.
+- Lint/build/tests: all pass (8 tests green).
+
 ## [1.5.0] - 2025-01-08
 
 ### ✨ Major UI/UX Enhancements
@@ -347,6 +362,7 @@ Thank you for using Theme Lab! 🎨
 
 <!-- Version Links -->
 [1.5.0]: https://github.com/edasevar/VSCode-Theme-Edit/releases/tag/v1.5.0
+[1.6.0]: https://github.com/edasevar/VSCode-Theme-Edit/releases/tag/v1.6.0
 [1.4.1]: https://github.com/edasevar/VSCode-Theme-Edit/releases/tag/v1.4.1
 [1.4.0]: https://github.com/edasevar/VSCode-Theme-Edit/releases/tag/v1.4.0
 [1.2.0]: https://github.com/edasevar/VSCode-Theme-Edit/releases/tag/v1.2.0

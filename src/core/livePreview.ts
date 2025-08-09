@@ -3,9 +3,9 @@ import { ThemeSpec, TextMateRule } from "./types";
 import { normalizeColor, normalizeColorMap } from "./color";
 
 // Restore originals on dispose
-let previousWorkbench: any | undefined;
-let previousTextmate: any | undefined;
-let previousSemantic: any | undefined;
+let previousWorkbench: Record<string, string> | undefined;
+let previousTextmate: { textMateRules?: TextMateRule[]; semanticHighlighting?: boolean } | undefined;
+let previousSemantic: Record<string, { foreground?: string; fontstyle?: string }> | undefined;
 
 /**
  * Live preview via user-level overrides:
@@ -34,16 +34,48 @@ export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 			if (typeof r.settings.background === "string") {
 				r.settings.background = normalizeColor(r.settings.background);
 			}
+			// Normalize TextMate fontStyle: remove 'normal', map 'underlined'->'underline', dedupe and sort
+			if (typeof r.settings.fontStyle === "string") {
+				const raw = r.settings.fontStyle.trim();
+				if (raw.length) {
+					const parts = raw.split(/\s+/)
+						.map(s => s.toLowerCase())
+						.filter(s => s !== "normal");
+					const mapped = parts.map(s => (s === "underlined" ? "underline" : s));
+					const allowed = ["italic", "bold", "underline", "strikethrough"] as const;
+					const unique = Array.from(new Set(mapped)).filter(s => (allowed as readonly string[]).includes(s));
+					// stable order for determinism
+					const ordered = allowed.filter(a => unique.includes(a));
+					r.settings.fontStyle = ordered.join(" ") || undefined;
+				} else {
+					r.settings.fontStyle = undefined;
+				}
+			}
 		}
 		return r;
 	});
 
-	const semanticRules: Record<string, any> = {};
+	const semanticRules: Record<string, { foreground?: string; italic?: boolean; bold?: boolean; underline?: boolean; strikethrough?: boolean }> = {};
 	for (const [k, v] of Object.entries(theme.semanticTokenColors)) {
 		if (typeof v === "string") {
 			semanticRules[k] = { foreground: normalizeColor(v) };
 		} else {
-			semanticRules[k] = { ...v, foreground: normalizeColor(v.foreground) };
+			const out: { foreground?: string; italic?: boolean; bold?: boolean; underline?: boolean; strikethrough?: boolean } = {};
+			if (typeof v.foreground === "string") out.foreground = normalizeColor(v.foreground);
+			// Convert fontStyle string to boolean flags per VS Code schema
+			if (typeof v.fontStyle === "string") {
+				const parts = v.fontStyle.trim().toLowerCase().split(/\s+/).filter(Boolean);
+				const has = (s: string) => parts.includes(s);
+				if (parts.length === 1 && parts[0] === "normal") {
+					out.italic = out.bold = out.underline = out.strikethrough = false;
+				} else {
+					out.italic = has("italic") || undefined;
+					out.bold = has("bold") || undefined;
+					out.underline = has("underline") || has("underlined") || undefined;
+					out.strikethrough = has("strikethrough") || has("strike") || has("struck") || undefined;
+				}
+			}
+			semanticRules[k] = out;
 		}
 	}
 
@@ -55,7 +87,7 @@ export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 	);
 	await cfg.update(
 		"editor.semanticTokenColorCustomizations",
-		{ rules: semanticRules },
+		{ enabled: true, rules: semanticRules },
 		vscode.ConfigurationTarget.Global
 	);
 }

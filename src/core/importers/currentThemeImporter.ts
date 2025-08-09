@@ -12,7 +12,7 @@ export async function importCurrentTheme (): Promise<ThemeSpec | null> {
 	if (!label) return null;
 
 	for (const ext of vscode.extensions.all) {
-		const contributes = (ext.packageJSON?.contributes?.themes ?? []) as any[];
+		const contributes = (ext.packageJSON?.contributes?.themes ?? []) as { label: string; path: string }[];
 		for (const t of contributes) {
 			if (t.label === label) {
 				const themePath = path.join(ext.extensionPath, t.path);

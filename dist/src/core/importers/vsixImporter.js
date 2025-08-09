@@ -67,7 +67,7 @@ async function importVsixTheme(vsixPath) {
         });
         if (!pick)
             throw new Error("Selection cancelled.");
-        picked = themes.find((t) => String(t.path) === pick.path);
+        picked = themes.find((t) => t.path === pick.path) || themes[0];
     }
     const themeRel = String(picked.path).replace(/^\.\//, "");
     const themeEntry = entries.find(e => e.entryName.endsWith(`/extension/${themeRel}`));

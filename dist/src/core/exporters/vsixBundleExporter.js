@@ -38,6 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.exportAsVsixBundle = exportAsVsixBundle;
 const vscode = __importStar(require("vscode"));
+const fs = __importStar(require("fs"));
 const adm_zip_1 = __importDefault(require("adm-zip"));
 /**
  * Bundle multiple themes into one VSIX, adding:
@@ -89,7 +90,7 @@ async function exportAsVsixBundle(themes) {
         const p = `extension/themes/${safeKebab(t.name || `theme-${i + 1}`)}.json`;
         zip.addFile(p, Buffer.from(JSON.stringify(t, null, 2), "utf8"));
     }
-    await vscode.workspace.fs.writeFile(saveUri, zip.toBuffer());
+    await fs.promises.writeFile(saveUri.fsPath, zip.toBuffer());
     vscode.window.showInformationMessage(`Saved bundle VSIX to ${saveUri.fsPath}`);
 }
 function safeKebab(s) {

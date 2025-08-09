@@ -10,7 +10,7 @@ Theme Lab is a comprehensive VS Code extension for designing and customizing col
 
 ### 🎨 Theme Design & Editing
 - **Live Preview**: See your changes instantly in the VS Code interface
-- **Comprehensive Coverage**: Edit workbench colors, TextMate token colors, and semantic tokens
+- **Comprehensive Coverage**: Edit workbench colors, TextMate token colors, and semantic tokens (see “Color customization rules & normalization” below)
 - **Advanced Color Support**: Full support for `#RRGGBBAA` alpha values with automatic conversion to `rgba()` format
 - **Categorized Editing**: Colors organized by functional categories (Editor, Activity Bar, Sidebar, etc.)
 - **Smart Search**: Filter colors by name to quickly find what you need
@@ -174,6 +174,77 @@ Theme Lab provides advanced color format handling:
 - `#RRGGBBAA` - 8-digit hex with alpha channel
 - Automatic conversion to `rgba(r, g, b, alpha)` format
 - Proper alpha blending in live preview
+
+## 🧩 Color customization rules & normalization
+
+Theme Lab applies your edits through VS Code’s user-level overrides and normalizes values for reliability.
+
+1) workbench.colorCustomizations
+- Define UI element colors (e.g., `editor.background`).
+- `#RRGGBBAA` is supported and converted to `rgba()` automatically during live preview.
+
+Example:
+```
+{
+   "workbench.colorCustomizations": {
+      "editor.background": "#ffffffaa"
+   }
+}
+```
+
+2) editor.tokenColorCustomizations.textMateRules
+- Each rule: `{ name?, scope, settings: { foreground?, background?, fontStyle? } }`.
+- fontStyle normalization:
+   - Allowed flags: `italic`, `bold`, `underline`, `strikethrough`.
+   - Aliases: `underlined` → `underline`.
+   - `normal` is removed (no styles). Duplicate/unknown tokens are dropped.
+   - Stable order is enforced: italic, bold, underline, strikethrough.
+- Colors like `#RRGGBBAA` are converted to `rgba()`.
+
+Example:
+```
+{
+   "editor.tokenColorCustomizations": {
+      "textMateRules": [
+         {
+            "name": "Emphasis",
+            "scope": ["markup.italic", "markup.bold"],
+            "settings": {
+               "fontStyle": "italic underlined normal",
+               "foreground": "#ffffffaa"
+            }
+         }
+      ],
+      "semanticHighlighting": true
+   }
+}
+```
+The above becomes `fontStyle: "italic underline"` at runtime and the color is applied as `rgba(255,255,255,0.667)`.
+
+3) editor.semanticTokenColorCustomizations.rules
+- For each semantic token (e.g., `variable.readonly`), you can set `foreground` and a `fontStyle` string.
+- The extension converts `fontStyle` strings into boolean flags `{ italic?, bold?, underline?, strikethrough? }` to match VS Code’s schema.
+- `normal` sets all style flags to `false`. Unknown tokens are ignored.
+- Colors like `#RRGGBBAA` are converted to `rgba()`.
+
+Example:
+```
+{
+   "editor.semanticTokenColorCustomizations": {
+      "rules": {
+         "variable.readonly": {
+            "fontStyle": "bold underlined",
+            "foreground": "#ffffffaa"
+         }
+      }
+   }
+}
+```
+At runtime this is applied as `{ bold: true, underline: true, foreground: "rgba(255,255,255,0.667)" }`.
+
+Notes
+- Live preview writes temporary overrides and restores your previous settings on exit.
+- If you use only `normal` in TextMate fontStyle, the style is removed; for semantic tokens, all flags are set to `false`.
 
 ## 🛠️ Recent Improvements (v1.4.1)
 

@@ -3,15 +3,12 @@
 	"displayName": "Theme Lab",
 	"description": "Design, preview, import/export VS Code themes with live preview, element navigation, validation, and #RRGGBBAA alpha support.",
 	"publisher": "edasevar",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"engines": {
 		"vscode": "^1.102.0"
 	},
 	"categories": [
 		"Other"
-	],
-	"activationEvents": [
-		"onCommand:themeLab.open"
 	],
 	"main": "./dist/src/extension.js",
 	"contributes": {
@@ -32,14 +29,14 @@
 		"clean": "rimraf dist dist-tests"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.0.0",
+		"@eslint/js": "^9.33.0",
 		"@types/adm-zip": "0.5.7",
 		"@types/mocha": "10.0.10",
-		"@types/node": "24.2.0",
+		"@types/node": "24.2.1",
 		"@types/vscode": "^1.102.0",
-		"@typescript-eslint/eslint-plugin": "^8.0.0",
-		"@typescript-eslint/parser": "^8.0.0",
-		"eslint": "9.32.0",
+		"@typescript-eslint/eslint-plugin": "^8.39.0",
+		"@typescript-eslint/parser": "^8.39.0",
+		"eslint": "9.33.0",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-plugin-import": "2.32.0",
 		"jsonc-parser": "3.3.1",

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { loadTemplateJsonc } from "../core/templateParser";
-import { ThemeSpec } from "../core/types";
+import { ThemeSpec, TextMateRule } from "../core/types";
 import { blankTheme } from "../core/themeModel";
 import { importJsonTheme } from "../core/importers/jsonImporter";
 import { importVsixTheme } from "../core/importers/vsixImporter";
@@ -42,7 +42,9 @@ export class ThemeLabPanel implements vscode.Disposable {
 			{
 				enableScripts: true,
 				retainContextWhenHidden: true,
-				localResourceRoots: [vscode.Uri.file(this.ctx.extensionPath)]
+				localResourceRoots: [vscode.Uri.file(this.ctx.extensionPath)],
+				portMapping: [], // Explicitly disable port mappings
+				enableCommandUris: false, // Disable command URIs that might trigger workers
 			}
 		);
 
@@ -93,7 +95,7 @@ export class ThemeLabPanel implements vscode.Disposable {
 		}
 	}
 
-	private async onMessage (msg: any) {
+	private async onMessage (msg: { type: string;[key: string]: unknown }) {
 		try {
 			switch (msg.type) {
 				case "uiStateChanged": {
@@ -153,8 +155,13 @@ export class ThemeLabPanel implements vscode.Disposable {
 						canSelectMany: false
 					});
 					if (file?.[0]) {
-						this.theme = await importVsixTheme(file[0].fsPath);
-						await this.onThemeUpdated();
+						const importedTheme = await importVsixTheme(file[0].fsPath);
+						if (importedTheme) {
+							this.theme = importedTheme;
+							await this.onThemeUpdated();
+						} else {
+							vscode.window.showWarningMessage("Failed to import theme from the selected VSIX file.");
+						}
 					}
 					break;
 				}
@@ -189,19 +196,25 @@ export class ThemeLabPanel implements vscode.Disposable {
 				}
 
 				case "updateColor":
-					this.theme.colors[msg.key] = msg.value;
+					if (typeof msg.key === "string") {
+						this.theme.colors[msg.key] = msg.value as string;
+					} else {
+						throw new Error("Invalid key type: expected a string.");
+					}
 					await this.onThemeUpdated(false);
 					break;
 
 				case "updateToken": {
 					const idx = Number(msg.index);
-					this.theme.tokenColors[idx] = msg.rule;
+					this.theme.tokenColors[idx] = msg.rule as TextMateRule;
 					await this.onThemeUpdated(false);
 					break;
 				}
 
 				case "updateSemantic":
-					this.theme.semanticTokenColors[msg.key] = msg.value;
+					if (typeof msg.key === "string") {
+						this.theme.semanticTokenColors[msg.key] = msg.value as string | { foreground?: string; fontStyle?: string }; // Type from webview message
+					}
 					await this.onThemeUpdated(false);
 					break;
 
@@ -252,8 +265,12 @@ export class ThemeLabPanel implements vscode.Disposable {
 				default:
 					break;
 			}
-		} catch (err: any) {
-			vscode.window.showErrorMessage(err?.message ?? String(err));
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				vscode.window.showErrorMessage(err.message);
+			} else {
+				vscode.window.showErrorMessage(String(err));
+			}
 		}
 	}
 
@@ -301,10 +318,55 @@ export class ThemeLabPanel implements vscode.Disposable {
     style-src ${webview.cspSource} 'unsafe-inline';
     script-src ${webview.cspSource} 'nonce-${nonce}';
     font-src ${webview.cspSource};
+    worker-src 'none';
+    child-src 'none';
+    frame-src 'none';
+    connect-src 'none';
+    manifest-src 'none';
   ">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="service-worker" content="none" />
+<meta name="theme-color" content="#1e1e1e" />
+<meta name="mobile-web-app-capable" content="no" />
+<meta name="apple-mobile-web-app-capable" content="no" />
 <link href="${cssUri}" rel="stylesheet" />
 <title>Theme Lab</title>
+<script nonce="${nonce}">
+  // Immediate service worker prevention - runs before any other scripts
+  (function() {
+    'use strict';
+    
+    // Override navigator.serviceWorker immediately
+    if (typeof navigator !== 'undefined') {
+      Object.defineProperty(navigator, 'serviceWorker', {
+        get: function() {
+          return {
+            register: function() {
+              return Promise.reject(new Error('Service workers disabled in webview'));
+            },
+            ready: Promise.reject(new Error('Service workers disabled in webview')),
+            controller: null,
+            getRegistration: function() {
+              return Promise.resolve(undefined);
+            },
+            getRegistrations: function() {
+              return Promise.resolve([]);
+            }
+          };
+        },
+        configurable: false,
+        enumerable: true
+      });
+    }
+    
+    // Prevent any other service worker attempts
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', function() {
+        // Prevent any last-minute service worker registration
+      });
+    }
+  })();
+</script>
 </head>
 <body>
   <header>
