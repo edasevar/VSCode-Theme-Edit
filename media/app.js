@@ -30,7 +30,7 @@ window.addEventListener("error", function (event) {
   console.error("Error message:", event.message);
   console.error("Error source:", event.filename, "line:", event.lineno);
 
-  // Don't let service worker errors break the extension
+// Don't let service worker errors break the extension
   if (
     event.error &&
     event.error.message &&

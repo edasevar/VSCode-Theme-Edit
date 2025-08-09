@@ -16,8 +16,22 @@
 			{
 				"command": "themeLab.open",
 				"title": "Theme Lab: Open"
+			},
+			{
+				"command": "themeLab.toggleSemanticTokens",
+				"title": "Theme Lab: Toggle Semantic Token Colors"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Theme Lab",
+			"properties": {
+				"themeLab.semanticTokensEnabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable semantic token color customizations applied by Theme Lab during live preview."
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",

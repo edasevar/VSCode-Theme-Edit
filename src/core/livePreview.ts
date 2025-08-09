@@ -16,6 +16,7 @@ let previousSemantic: Record<string, { foreground?: string; fontstyle?: string }
  */
 export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 	const cfg = vscode.workspace.getConfiguration();
+	const semanticEnabled = cfg.get<boolean>("themeLab.semanticTokensEnabled", true);
 
 	if (previousWorkbench === undefined) {
 		previousWorkbench = cfg.get("workbench.colorCustomizations");
@@ -87,7 +88,7 @@ export async function applyLivePreview (theme: ThemeSpec): Promise<void> {
 	);
 	await cfg.update(
 		"editor.semanticTokenColorCustomizations",
-		{ enabled: true, rules: semanticRules },
+	{ enabled: !!semanticEnabled, rules: semanticRules },
 		vscode.ConfigurationTarget.Global
 	);
 }

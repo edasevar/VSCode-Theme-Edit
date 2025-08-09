@@ -50,6 +50,7 @@ let previousSemantic;
  */
 async function applyLivePreview(theme) {
     const cfg = vscode.workspace.getConfiguration();
+    const semanticEnabled = cfg.get("themeLab.semanticTokensEnabled", true);
     if (previousWorkbench === undefined) {
         previousWorkbench = cfg.get("workbench.colorCustomizations");
         previousTextmate = cfg.get("editor.tokenColorCustomizations");
@@ -114,7 +115,7 @@ async function applyLivePreview(theme) {
     }
     await cfg.update("workbench.colorCustomizations", workbench, vscode.ConfigurationTarget.Global);
     await cfg.update("editor.tokenColorCustomizations", { textMateRules, semanticHighlighting: true }, vscode.ConfigurationTarget.Global);
-    await cfg.update("editor.semanticTokenColorCustomizations", { enabled: true, rules: semanticRules }, vscode.ConfigurationTarget.Global);
+    await cfg.update("editor.semanticTokenColorCustomizations", { enabled: !!semanticEnabled, rules: semanticRules }, vscode.ConfigurationTarget.Global);
 }
 async function resetLivePreview() {
     const cfg = vscode.workspace.getConfiguration();

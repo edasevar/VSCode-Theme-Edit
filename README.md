@@ -11,6 +11,8 @@ Theme Lab is a comprehensive VS Code extension for designing and customizing col
 ### 🎨 Theme Design & Editing
 - **Live Preview**: See your changes instantly in the VS Code interface
 - **Comprehensive Coverage**: Edit workbench colors, TextMate token colors, and semantic tokens (see “Color customization rules & normalization” below)
+- **Comprehensive Coverage**: Edit workbench colors, TextMate token colors, and semantic tokens (see “Color customization rules & normalization” below)
+- **Semantic Toggle**: Quickly enable/disable semantic token colors via setting or command
 - **Advanced Color Support**: Full support for `#RRGGBBAA` alpha values with automatic conversion to `rgba()` format
 - **Categorized Editing**: Colors organized by functional categories (Editor, Activity Bar, Sidebar, etc.)
 - **Smart Search**: Filter colors by name to quickly find what you need
@@ -245,6 +247,15 @@ At runtime this is applied as `{ bold: true, underline: true, foreground: "rgba(
 Notes
 - Live preview writes temporary overrides and restores your previous settings on exit.
 - If you use only `normal` in TextMate fontStyle, the style is removed; for semantic tokens, all flags are set to `false`.
+
+### Semantic token colors enabled toggle
+
+By default, Theme Lab enables semantic token color customizations during live preview. You can control this:
+
+- Setting: `themeLab.semanticTokensEnabled` (default: true)
+- Command: `Theme Lab: Toggle Semantic Token Colors`
+
+When disabled, Theme Lab still computes semantic token rules but applies them with `"editor.semanticTokenColorCustomizations.enabled": false`, so only workbench and TextMate colors affect the preview.
 
 ## 🛠️ Recent Improvements (v1.4.1)
 

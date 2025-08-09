@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TextMate `fontStyle` normalization: remove `normal`, map `underlined`→`underline`, dedupe unknowns, and enforce stable order `italic bold underline strikethrough`.
 - Semantic token `fontStyle` strings converted to boolean flags `{ italic?, bold?, underline?, strikethrough? }`; `normal` sets all flags to `false`.
  - Live preview now sets `editor.semanticTokenColorCustomizations.enabled: true` when applying rules so semantic token colors take effect immediately.
+ - Added setting `themeLab.semanticTokensEnabled` and command `Theme Lab: Toggle Semantic Token Colors` to control whether semantic token colors are enabled during live preview.
 
 ### 🛡️ Webview Robustness
 - Guarded `postMessage` calls in `media/app.js` to avoid runtime errors if VS Code API is unavailable.

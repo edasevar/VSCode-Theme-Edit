@@ -27,7 +27,8 @@ function normalizeColorMap(map) {
     // Use a flexible target to support object-like maps; arrays are passed through unchanged
     const out = {};
     for (const [k, v] of Object.entries(map)) {
-        out[k] = typeof v === "string" ? normalizeColor(v) : v;
+        out[k] =
+            typeof v === "string" ? normalizeColor(v) : v;
     }
     return out;
 }
