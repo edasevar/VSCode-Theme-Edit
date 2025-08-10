@@ -1,0 +1,174 @@
+/* Purpose: layout for 2-panel editor & controls. */
+
+:root {
+	--bg: #1e1e1e;
+	--panel: #252526;
+	--text: #ddd;
+	--muted: #aaa;
+	--accent: #0e639c;
+	--border: #3c3c3c;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font: 13px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--border);
+	background: var(--panel);
+}
+
+header .brand {
+	font-weight: 700;
+}
+
+header .spacer {
+	flex: 1;
+}
+
+header button {
+	background: #2d2d30;
+	color: var(--text);
+	border: 1px solid var(--border);
+	padding: 4px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+header button:hover {
+	border-color: var(--accent);
+}
+
+main {
+	display: grid;
+	grid-template-columns: 360px 1fr;
+	height: calc(100vh - 46px);
+}
+
+.left {
+	border-right: 1px solid var(--border);
+	padding: 8px;
+	overflow: auto;
+	background: #202020;
+}
+
+.tabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 8px;
+}
+
+.tab {
+	flex: 1;
+	padding: 6px 8px;
+	background: #2a2a2a;
+	border: 1px solid var(--border);
+	cursor: pointer;
+}
+
+.tab.active {
+	background: #333;
+	border-color: var(--accent);
+}
+
+.pane {
+	display: none;
+}
+
+.pane.active {
+	display: block;
+}
+
+.group {
+	margin-bottom: 10px;
+}
+
+.group label {
+	display: block;
+	margin-bottom: 4px;
+	color: var(--muted);
+}
+
+.group select,
+.group input[type="text"],
+.group input[type="number"] {
+	width: 100%;
+	padding: 6px;
+	background: #1b1b1c;
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+}
+
+.color-tools {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 6px;
+}
+
+#color-picker {
+	width: 100%;
+	height: 34px;
+	border: none;
+}
+
+.alpha {
+	display: grid;
+	grid-template-columns: 50px 1fr 70px;
+	align-items: center;
+	gap: 6px;
+}
+
+.alpha input[type="range"] {
+	width: 100%;
+}
+
+.description {
+	color: var(--muted);
+	padding: 6px;
+	background: #1c1c1c;
+	border: 1px dashed var(--border);
+	border-radius: 4px;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+}
+
+.actions button {
+	padding: 6px 8px;
+	background: #2a2a2a;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.actions button:hover {
+	border-color: var(--accent);
+}
+
+.right {
+	overflow: auto;
+}
+
+.preview {
+	padding: 12px;
+}
+
+.highlight {
+	outline: 2px solid #ffcc00;
+	outline-offset: 2px;
+	transition: outline-color 0.2s ease-in-out;
+}

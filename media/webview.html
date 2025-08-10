@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webview</title>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none'; 
+    img-src data: {{cspSource}};
+    style-src 'unsafe-inline' {{cspSource}};
+    script-src 'nonce-{{nonce}}' {{cspSource}};
+    font-src data:;
+  " />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{styles}}" />
+  <link rel="stylesheet" href="{{previewCss}}" />
+
+  <!-- Template injected as JSON to avoid JS syntax issues -->
+  <script nonce="{{nonce}}" id="themelab-template" type="application/json">
+    {{templateInline}}
+  </script>
+  <!-- App script -->
+  <script nonce="{{nonce}}" src="{{script}}"></script>
+</head>
+
+<body>
+  <header>
+    <div class="brand">Theme Lab</div>
+    <div class="spacer"></div>
+    <div class="start-modes">
+      <button data-start="current" title="Use current theme">Use Current</button>
+      <button data-start="blank" title="Start with a blank theme">Blank</button>
+      <button data-start="import-json" title="Import a theme JSON file">Import JSON</button>
+      <button data-start="import-vsix" title="Import a VSIX theme">Import VSIX</button>
+    </div>
+    <div class="exports">
+      <button data-export="json" title="Export theme JSON">Export JSON</button>
+      <button data-export="css" title="Export CSS variables">Export CSS</button>
+      <button data-export="vsix" title="Export a ready-to-install VSIX">Export VSIX</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="left">
+      <div class="tabs">
+        <div class="tab active" data-tab="colors">Colors</div>
+        <div class="tab" data-tab="tokens">Tokens</div>
+        <div class="tab" data-tab="semantics">Semantic</div>
+      </div>
+
+      <div id="pane-colors" class="pane active">
+        <div class="group">
+          <label for="color-category">Category</label>
+          <select id="color-category"></select>
+        </div>
+        <div class="group">
+          <label for="color-key">Key</label>
+          <select id="color-key"></select>
+        </div>
+        <div class="group color-tools">
+          <input id="color-picker" type="color" title="Pick color" />
+          <div class="alpha">
+            <span>Alpha</span>
+            <input id="alpha" type="range" min="0" max="255" value="255" title="Alpha (0-255)" />
+            <input id="alpha-num" type="number" min="0" max="255" value="255" title="Alpha numeric (0-255)" />
+          </div>
+          <input id="color-hex" type="text" placeholder="#RRGGBB or #RRGGBBAA" />
+          <div class="actions">
+            <button id="apply-color">Apply</button>
+            <button id="nav-color">Locate in Preview</button>
+          </div>
+          <div id="color-desc" class="description"></div>
+        </div>
+      </div>
+
+      <div id="pane-tokens" class="pane">
+        <div class="group">
+          <label for="token-rule">Rule</label>
+          <select id="token-rule"></select>
+        </div>
+        <div class="group">
+          <label for="token-scope">Scopes (comma separated)</label>
+          <input id="token-scope" type="text" />
+        </div>
+        <div class="group">
+          <label for="token-hex">Foreground</label>
+          <input id="token-hex" type="text" placeholder="#RRGGBB" />
+        </div>
+        <div class="group fontstyle">
+          <label>Font style</label>
+          <label><input type="checkbox" value="italic" /> italic</label>
+          <label><input type="checkbox" value="bold" /> bold</label>
+          <label><input type="checkbox" value="underline" /> underline</label>
+          <label><input type="checkbox" value="strikethrough" /> strikethrough</label>
+        </div>
+        <div class="actions">
+          <button id="apply-token">Apply</button>
+          <button id="add-token">Add Rule</button>
+          <button id="nav-token">Locate in Preview</button>
+        </div>
+        <div id="token-desc" class="description"></div>
+      </div>
+
+      <div id="pane-semantics" class="pane">
+        <div class="group">
+          <label for="sem-token">Token</label>
+          <select id="sem-token"></select>
+        </div>
+        <div class="group">
+          <label for="sem-hex">Foreground</label>
+          <input id="sem-hex" type="text" placeholder="#RRGGBB" />
+        </div>
+        <div class="group fontstyle">
+          <label>Font style</label>
+          <label><input type="checkbox" value="italic" /> italic</label>
+          <label><input type="checkbox" value="bold" /> bold</label>
+          <label><input type="checkbox" value="underline" /> underline</label>
+          <label><input type="checkbox" value="strikethrough" /> strikethrough</label>
+        </div>
+        <div class="actions">
+          <button id="apply-sem">Apply</button>
+          <button id="nav-sem">Locate in Preview</button>
+        </div>
+        <div id="sem-desc" class="description"></div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="preview">
+        <div class="titlebar" data-preview-target="titleBar.activeBackground">
+          <strong>Title Bar</strong>
+        </div>
+        <div class="workbench">
+          <aside class="sidebar" data-preview-target="sideBar.background">
+            <div class="section">EXPLORER</div>
+            <div class="item active">src</div>
+            <div class="item">media</div>
+            <div class="item">assets</div>
+          </aside>
+          <div class="editor" data-preview-target="editor.background">
+            <div class="editor-header">
+              <div class="tab active">index.ts</div>
+              <div class="tab">util.ts</div>
+              <div class="tab">styles.css</div>
+            </div>
+            <pre class="code">
+<span class="tm keyword">export</span> <span class="tm keyword">const</span> <span class="tm entity">name</span> <span class="tm operator">=</span> <span class="tm string">"Theme Lab"</span><span class="tm punctuation">;</span>
+<span class="tm type">function</span> greet<span class="tm punctuation">(</span><span class="tm variable">msg</span><span class="tm punctuation">:</span> <span class="tm type">string</span><span class="tm punctuation">)</span> <span class="tm punctuation">{</span>
+  <span class="tm keyword">return</span> <span class="tm string">`Hello, ${</span><span class="tm variable">msg</span><span class="tm string">}`</span><span class="tm punctuation">;</span>
+<span class="tm punctuation">}</span>
+            </pre>
+            <div class="cursor" data-preview-target="editorCursor.foreground">│</div>
+          </div>
+        </div>
+        <div class="statusbar" data-preview-target="statusBar.background">
+          STATUS: Ready
+        </div>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

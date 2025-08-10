@@ -1,10 +1,5 @@
 node_modules
 .vscode
-dist-tests
-.github
-*dist\src\core
-.eslintrc.json
-.prettierrc
-.vscodeignore
+VSCodeMemory
 .gitignore
-eslint.config.js
+scripts/update-dir-tree.js

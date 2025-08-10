@@ -1,66 +1,75 @@
 {
 	"name": "theme-lab",
 	"displayName": "Theme Lab",
-	"description": "Design, preview, import/export VS Code themes with live preview, element navigation, validation, and #RRGGBBAA alpha support.",
+	"description": "Design, preview, and export VS Code themes with live preview and token/semantic editing.",
+	"version": "0.2.0",
 	"publisher": "edasevar",
-	"version": "1.6.0",
 	"engines": {
 		"vscode": "^1.102.0"
 	},
 	"categories": [
+		"Themes",
 		"Other"
 	],
-	"main": "./dist/src/extension.js",
+	"icon": "assets/icon.png",
+	"activationEvents": [
+		"onCommand:theme-lab.open",
+		"onCommand:theme-lab.importVsix",
+		"onCommand:theme-lab.importJson",
+		"onCommand:theme-lab.startBlank",
+		"onCommand:theme-lab.useCurrent"
+	],
 	"contributes": {
 		"commands": [
 			{
-				"command": "themeLab.open",
+				"command": "theme-lab.open",
 				"title": "Theme Lab: Open"
 			},
 			{
-				"command": "themeLab.toggleSemanticTokens",
-				"title": "Theme Lab: Toggle Semantic Token Colors"
+				"command": "theme-lab.importVsix",
+				"title": "Theme Lab: Import VSIX"
+			},
+			{
+				"command": "theme-lab.importJson",
+				"title": "Theme Lab: Import Theme JSON"
+			},
+			{
+				"command": "theme-lab.startBlank",
+				"title": "Theme Lab: Start Blank Theme"
+			},
+			{
+				"command": "theme-lab.useCurrent",
+				"title": "Theme Lab: Use Current Theme"
 			}
 		],
 		"configuration": {
 			"title": "Theme Lab",
 			"properties": {
-				"themeLab.semanticTokensEnabled": {
+				"theme-lab.preview.applyToWorkspace": {
 					"type": "boolean",
 					"default": true,
-					"description": "Enable semantic token color customizations applied by Theme Lab during live preview."
+					"description": "Apply live preview by writing to workspace settings (recommended). If off, uses global settings."
 				}
 			}
 		}
 	},
+	"main": "./out/src/extension.js",
 	"scripts": {
-		"vscode:prepublish": "npm run build",
-		"build": "tsc -p tsconfig.build.json",
-		"watch": "tsc -w -p tsconfig.build.json",
-		"lint": "eslint . --ext .ts",
-		"format": "prettier -w .",
-		"test": "tsc -p tsconfig.tests.json && mocha --ui tdd --timeout 10000 --colors ./dist-tests/tests/**/*.test.js",
-		"clean": "rimraf dist dist-tests"
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p .",
+		"watch": "tsc -w -p .",
+		"build": "npm run compile",
+		"package": "vsce package",
+		"lint": "echo \"(add eslint if you like)\"",
+		"mem:tree": "node scripts/update-dir-tree.js"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.33.0",
-		"@types/adm-zip": "0.5.7",
-		"@types/mocha": "10.0.10",
-		"@types/node": "24.2.1",
 		"@types/vscode": "^1.102.0",
-		"@typescript-eslint/eslint-plugin": "^8.39.0",
-		"@typescript-eslint/parser": "^8.39.0",
-		"eslint": "9.33.0",
-		"eslint-config-prettier": "10.1.8",
-		"eslint-plugin-import": "2.32.0",
-		"jsonc-parser": "3.3.1",
-		"mocha": "11.7.1",
-		"prettier": "3.6.2",
-		"rimraf": "6.0.1",
-		"typescript": "5.9.2",
-		"vscode-test": "1.6.1"
+		"typescript": "^5.9.2",
+		"vsce": "^2.15.0"
 	},
 	"dependencies": {
-		"adm-zip": "0.5.16"
+		"jszip": "^3.10.1",
+		"jsonc-parser": "^3.3.1"
 	}
 }

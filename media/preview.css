@@ -1,0 +1,111 @@
+/* Purpose: synthetic preview UI reacting to color keys. */
+
+.titlebar {
+	padding: 8px 12px;
+	background: var(--titleBar-activeBackground, #3c3c3c);
+	color: var(--titleBar-activeForeground, #ffffff);
+	margin-bottom: 8px;
+	border: 1px solid #2b2b2b;
+}
+
+.workbench {
+	display: grid;
+	grid-template-columns: 220px 1fr;
+	border: 1px solid #2b2b2b;
+}
+
+.sidebar {
+	background: var(--sideBar-background, #252526);
+	color: var(--sideBar-foreground, #cccccc);
+	padding: 8px;
+	min-height: 380px;
+}
+
+.sidebar .section {
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+
+.sidebar .item {
+	padding: 4px;
+	border-radius: 3px;
+}
+
+.sidebar .item.active {
+	background: #3a3d41;
+}
+
+.editor {
+	background: var(--editor-background, #1e1e1e);
+	color: var(--editor-foreground, #d4d4d4);
+	padding: 8px;
+	position: relative;
+}
+
+.editor-header {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 6px;
+}
+
+.tab {
+	padding: 4px 8px;
+	background: #2d2d30;
+	border-radius: 4px 4px 0 0;
+}
+
+.tab.active {
+	background: #1e1e1e;
+}
+
+.code {
+	margin: 0;
+	padding: 8px;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid #2b2b2b;
+	border-radius: 4px;
+	white-space: pre;
+}
+
+.cursor {
+	position: absolute;
+	right: 16px;
+	top: 16px;
+	color: var(--editorCursor-foreground, #aeafad);
+}
+
+.tm.keyword {
+	color: var(--tm-keyword, #c586c0);
+	font-weight: 600;
+}
+
+.tm.entity {
+	color: var(--tm-entity, #4fc1ff);
+}
+
+.tm.variable {
+	color: var(--tm-variable, #9cdcfe);
+}
+
+.tm.string {
+	color: var(--tm-string, #ce9178);
+}
+
+.tm.type {
+	color: var(--tm-type, #4ec9b0);
+}
+
+.tm.operator {
+	color: var(--tm-operator, #d4d4d4);
+}
+
+.tm.punctuation {
+	color: var(--tm-punct, #d4d4d4);
+}
+
+.statusbar {
+	margin-top: 8px;
+	padding: 6px 12px;
+	background: var(--statusBar-background, #007acc);
+	color: var(--statusBar-foreground, #ffffff);
+}

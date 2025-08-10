@@ -1,32 +1,24 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
-		"module": "commonjs",
 		"lib": [
 			"ES2022"
 		],
-		"moduleResolution": "node",
-		"outDir": "dist",
+		"module": "CommonJS",
+		"moduleResolution": "Node",
+		"outDir": "out",
 		"rootDir": ".",
 		"strict": true,
+		"sourceMap": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
-		"skipLibCheck": true,
-		"sourceMap": true,
 		"types": [
-			"node",
 			"vscode"
-		],
-		"typeRoots": [
-			"./node_modules/@types"
 		]
 	},
 	"include": [
-		"src/**/*.ts"
-	],
-	"exclude": [
-		"tests/**",
-		"node_modules/**"
+		"src/**/*",
+		"assets/template.json"
 	]
 }

@@ -1,6 +1,0 @@
-**/.git**
-**/.vscode/**
-**/tests/**
-**/*.map
-**/*.ts
-node_modules/**/test/**
